@@ -1,0 +1,38 @@
+app-id: io.github.CalebDepatie.dgtkflatpak.yml
+runtime: org.gnome.Platform
+runtime-version: '44'
+sdk: org.gnome.Sdk
+sdk-extensions: 
+  - org.freedesktop.Sdk.Extension.dmd
+command: BoxHub
+
+modules:
+  - name: d-gtk-flatpak
+    buildsystem: simple
+    build-options:
+      append-path: /usr/lib/sdk/dmd/bin
+    sources:
+      - type: archive
+        url: https://gtkd.org/Downloads/sources/GtkD-3.10.0.zip
+        sha256: 6ff8d6c832fda4adc1ac49893190f24a62f27a88ad3e7bc5ab02643596d6856d
+        strip-components: 0
+    build-commands:
+      - LDFLAGS='' make shared
+      - mkdir /app/lib/
+      - make prefix=/app/ install
+
+  - name: d-gtk-flatpak
+    buildsystem: meson
+    build-options:
+      append-path: /usr/lib/sdk/dmd/bin:/app/lib
+      append-pkg-config-path: /app/lib/pkgconfig
+      append-ld-library-path: /app/lib
+    sources:
+      - type: dir
+        path: .
+    post-install:
+      - cp /usr/lib/sdk/dmd/lib/libphobos2.so* /app/lib/
+      
+finish-args:
+  - --socket=wayland
+  - --socket=x11
